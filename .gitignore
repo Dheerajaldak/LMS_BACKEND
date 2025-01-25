@@ -1,0 +1,31 @@
+# Node modules
+node_modules/
+
+# Logs
+*.log
+
+# Dependency directories
+npm-debug.log*
+yarn-error.log*
+
+# Environment variables files
+# .env
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# IDE/editor settings (e.g., Visual Studio Code)
+.vscode/
+.idea/
+
+# Build directories
+build/
+dist/
+
+# Test coverage reports
+coverage/
+
+# Optional: Ignore compiled JavaScript files if you're using TypeScript
+*.js
+*.map
