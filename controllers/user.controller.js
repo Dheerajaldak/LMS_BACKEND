@@ -107,15 +107,19 @@ const login = async (req, res, next) => {
 };
 
 const logout = (req, res,) => {
-  res.cookie("token", null, {
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 0,
-    httpOnly: true,
-  });
-  res.status(200).json({
-    success: true,
-    message: "User logged out successfully",
-  });
+  try {
+    res.cookie("token", null, {
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 0,
+      httpOnly: true,
+    });
+    res.status(200).json({
+      success: true,
+      message: "User logged out successfully",
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 500));
+  }
 };
 const getProfile = async (req, res, next) => {
   try {
@@ -269,14 +273,14 @@ const changePassword = async (req, res, next) => {
 
 const updateUser = async (req, res, next) => {
   const { fullName } = req.body;
-  const { id } = req.user.id; // Corrected line
+  const { id } = req.user;
 
   const user = await User.findById(id);
   if (!user) {
     return next(new AppError("User does not exist!", 400));
   }
 
-  if (req.fullName) {
+  if (fullName) {
     user.fullName = fullName;
   }
 

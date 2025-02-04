@@ -33,6 +33,7 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/courses", courseRoutes);
 app.use("/api/v1/payments", paymentRoutes);
 
+
 // Routes of 3 modules
 app.all("*", (req, res) => {
   res.status(404).send("OOPS!! 404 page not found..");
