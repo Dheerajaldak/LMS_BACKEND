@@ -27,12 +27,17 @@ router
   .route("/:id")
   .get(isLoggedIn, getLecturesByCourseId) //also give - authorizeSubscriber
   .put(isLoggedIn, authorizedRoles("ADMIN"), updateCourse)
-  .delete(isLoggedIn, removeCourse, removeLecture)
+  .delete(isLoggedIn, removeCourse)
   .post(
     isLoggedIn,
     authorizedRoles("ADMIN"),
     upload.single("lecture"),
     addLectureToCourseById
   );
+
+  router
+  .route("/:courseId/lectures/:lectureId")
+  .delete(isLoggedIn, removeLecture); // DELETE route that handles lecture deletion
+
 
 export default router;

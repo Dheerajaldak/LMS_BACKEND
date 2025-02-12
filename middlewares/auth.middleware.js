@@ -14,7 +14,7 @@ const isLoggedIn = async (req, _res, next) => {
 
 const authorizedRoles =
   (...roles) =>
-  (req, res, next) => {
+  (req, _res, next) => {
     const currentUserRole = req.user.role;
     if (!roles.includes(currentUserRole)) {
       return next(
@@ -27,7 +27,7 @@ const authorizedRoles =
     next();
   };
 
-const authorizeSubscriber = async (req, res, next) => {
+const authorizeSubscriber = async (req, _res, next) => {
   const subscription = req.user.subscription;
   const currentUserRole = req.user.role;
   if (currentUserRole !== "ADMIN" && subscription.status !== "active") {

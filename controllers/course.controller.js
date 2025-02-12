@@ -3,6 +3,7 @@ import AppError from "../utils/error.util.js";
 import cloudinary from "cloudinary";
 import fs from "fs/promises";
 
+
 const getAllCourses = async function (req, res, next) {
   try {
     const courses = await Course.find({}).select("-lectures");
@@ -189,7 +190,6 @@ const removeCourse = async function (req, res, next) {
     return next(new AppError(e.message, 500));
   }
 };
-// to addlecture give courese id in url (POST)
 const addLectureToCourseById = async function (req, res, next) {
   try {
     const { title, description } = req.body;
@@ -198,44 +198,46 @@ const addLectureToCourseById = async function (req, res, next) {
     if (!title || !description) {
       return next(new AppError("All fields are required", 400));
     }
+
     const course = await Course.findById(id);
 
     if (!course) {
       return next(new AppError("Course does not exist with the given id", 500));
     }
 
-    const lecturesDate = {
+    const lecturesData = {
       title,
       description,
-      lectures: {}, // Initialize `lectures` object here
+      lectures: {},
     };
 
     if (req.file) {
       try {
-        const result = await cloudinary.v2.uploader.upload(req.file.path, {
-          folder: "lms",
-        });
-        console.log("Result:==", JSON.stringify(result));
+        const isVideo = req.file.mimetype.startsWith('video/');
 
-        if (result) {
-          // Place `public_id` and `secure_url` inside the `lectures` object
-          lecturesDate.lectures.public_id = result.public_id;
-          lecturesDate.lectures.secure_url = result.secure_url;
+        if (!isVideo) {
+          return next(new AppError("Only video files are allowed", 400));
         }
 
-        // Clean up the uploaded file
-        fs.rm(`uploads/${req.file.filename}`);
+        const result = await cloudinary.v2.uploader.upload(req.file.path, {
+          folder: "lms",
+          resource_type: 'video',
+        });
+
+        console.log("Cloudinary Result:", JSON.stringify(result));
+
+        if (result) {
+          lecturesData.lectures.public_id = result.public_id;
+          lecturesData.lectures.secure_url = result.secure_url;  // Ensure this is included
+        }
+
+        await fs.rm(`uploads/${req.file.filename}`, { force: true });
       } catch (e) {
         return next(new AppError(e.message, 500));
       }
     }
 
-    console.log("lecture >", JSON.stringify(lecturesDate));
-
-    // Push the updated `lecturesDate` object into `course.lectures`
-    course.lectures.push(lecturesDate);
-
-    // Update number of lectures
+    course.lectures.push(lecturesData);
     course.numbersOfLectures = course.lectures.length;
 
     await course.save();
@@ -243,27 +245,31 @@ const addLectureToCourseById = async function (req, res, next) {
     res.status(200).json({
       success: true,
       message: "Lecture successfully added to the course ✔",
-      course,
+      course: {
+        ...course._doc,
+        lectures: course.lectures.map((lecture) => ({
+          ...lecture,
+          secure_url: lecture.lectures.secure_url,  // Ensure URL is returned here
+        })),
+      },
     });
   } catch (e) {
     return next(new AppError(e.message, 500));
   }
 };
-// delete give lecture id in url and (DELETE)
-const removeLecture = async function (req, res, next) {
+
+const removeLecture = async (req, res, next) => {
   try {
-    const { id, lectureId } = req.params;
+    const { courseId, lectureId } = req.params;
 
-    const course = await Course.findById(id);
-
+    const course = await Course.findById(courseId);
     if (!course) {
       return next(new AppError("Course with given id does not exist", 404));
     }
 
     const lectureIndex = course.lectures.findIndex(
-      (lecture) => lecture.lectures.public_id === lectureId
+      (lecture) => lecture._id.toString() === lectureId
     );
-
     if (lectureIndex === -1) {
       return next(new AppError("Lecture with given id does not exist", 404));
     }
