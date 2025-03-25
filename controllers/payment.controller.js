@@ -124,7 +124,7 @@ export const buySubsription = async (req, res, next) => {
     }
 
     // Debugging log to verify the plan_id
-    console.log("Plan ID from environment:", plan_id);
+    // console.log("Plan ID from environment:", plan_id);
 
     // Fetch Razorpay plan to check amount (in paise) requirement
     let razorpayPlan;
@@ -132,7 +132,7 @@ export const buySubsription = async (req, res, next) => {
       razorpayPlan = await razorpay.plans.fetch(plan_id);
       console.log("Fetched Razorpay Plan:", razorpayPlan);  // Log the fetched plan to debug
     } catch (error) {
-      console.error("Error fetching Razorpay plan:", error);
+      // console.error("Error fetching Razorpay plan:", error);
       return next(new AppError("Failed to fetch Razorpay plan information", 400));
     }
 
@@ -160,7 +160,7 @@ export const buySubsription = async (req, res, next) => {
     });
 
     // Log Razorpay subscription creation response
-    console.log("Razorpay Subscription Response:", subscription);
+    // console.log("Razorpay Subscription Response:", subscription);
 
     if (!subscription || !subscription.id) {
       return next(new AppError("Failed to create subscription, Razorpay did not return a valid ID", 400));
@@ -384,6 +384,7 @@ export const verifySubscription = async (req, res, next) => {
 //     return next(new AppError(e.message, 500));
 //   }
 // };
+
 
 export const cancleSubscription = async (req, res, next) => {
   try {
