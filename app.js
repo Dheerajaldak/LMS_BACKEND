@@ -19,7 +19,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL],
+    origin: [
+      'https://lms-dheeraj-fullstack.vercel.app', // Production URL
+      'http://localhost:5173', // Local development URL
+    ],
     credentials: true,
   })
 );
